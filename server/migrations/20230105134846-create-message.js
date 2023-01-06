@@ -10,10 +10,18 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       TopicId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Topics",
+          key: "id"
+        }
       },
       UserId: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Users",
+          key: "id"
+        }
       },
       text: {
         type: Sequelize.TEXT
