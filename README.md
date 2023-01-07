@@ -9,8 +9,8 @@ Target:
 - [x] User Model
 - [x] Topic Model
 - [x] Message Model
-- [ ] Create Topic
-- [ ] Create Message
+- [x] Create Topic
+- [x] Create Message
 - [ ] Read Topic
 - [ ] Read Message
 - [ ] Delete Topic

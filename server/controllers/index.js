@@ -6,9 +6,9 @@ class Controller {
             let { title } = req.params
             let calledForum = await Topic.findOne({where : { title }, include: [Message]})
 
-            
+            res.status(200).json(calledForum)
         } catch (error) {
-            next (error)
+            console.log(error);
         }
     }
 
@@ -17,9 +17,9 @@ class Controller {
             let { title } = req.body
             let newForum = await Topic.create({title})
 
-
+            res.status(200).json(newForum)
         } catch (error) {
-            next (error)
+            console.log(error);
         }
     }
 
@@ -33,8 +33,9 @@ class Controller {
             if (!calledForum) throw ({name: "UnknownForum"})
 
             let newMessage = await Message.create({TopicId: calledForum.id, UserId: id, text})
+            res.status(200).json(newMessage)
         } catch (error) {
-            next(error)
+            console.log(error);
         }
     }
 }
