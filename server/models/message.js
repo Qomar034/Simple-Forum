@@ -11,6 +11,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Message.belongsTo(models.User, {
+        foreignKey: UserId
+      })
+      Message.belongsTo(models.Topic, {
+        foreignKey: TopicId
+      })
     }
   }
   Message.init({
