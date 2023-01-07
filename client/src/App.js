@@ -1,53 +1,46 @@
 import "./App.css";
 import io from "socket.io-client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Forum from "./Forum";
 
 const socket = io.connect("http://localhost:3001");
-socket.on("receive_message", (data) => {
-  setMessageReceived(data.message);
-});
 
 function App() {
-  //Room State
+  const [username, setUsername] = useState("");
   const [room, setRoom] = useState("");
-
-  // Messages States
-  const [message, setMessage] = useState("");
-  const [messageReceived, setMessageReceived] = useState("");
+  const [showForum, setShowForum] = useState(false);
 
   const joinRoom = () => {
-    if (room !== "") {
+    if (username !== "" && room !== "") {
       socket.emit("join_room", room);
+      setShowForum(true);
     }
   };
 
-  const sendMessage = () => {
-    socket.emit("send_message", { message, room });
-  };
-
-  useEffect(() => {
-    socket.on("receive_message", (data) => {
-      setMessageReceived(data.message);
-    });
-  }, [socket]);
   return (
     <div className="App">
-      <input
-        placeholder="Room Number..."
-        onChange={(event) => {
-          setRoom(event.target.value);
-        }}
-      />
-      <button onClick={joinRoom}> Join Room</button>
-      <input
-        placeholder="Message..."
-        onChange={(event) => {
-          setMessage(event.target.value);
-        }}
-      />
-      <button onClick={sendMessage}> Send Message</button>
-      <h1> Message:</h1>
-      {messageReceived}
+      {!showForum ? (
+        <div className="joinForumContainer">
+          <h3>Join A Forum</h3>
+          <input
+            type="text"
+            placeholder="Username"
+            onChange={(event) => {
+              setUsername(event.target.value);
+            }}
+          />
+          <input
+            type="text"
+            placeholder="Room ID..."
+            onChange={(event) => {
+              setRoom(event.target.value);
+            }}
+          />
+          <button onClick={joinRoom}>Join A Room</button>
+        </div>
+      ) : (
+        <Forum socket={socket} username={username} room={room} />
+      )}
     </div>
   );
 }
