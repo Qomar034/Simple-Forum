@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import ScrollToBottom from "react-scroll-to-bottom";
 
-function Forum({ socket, username, room }) {
+function Forum({ socket, username, room, previousMessage }) {
   const [currentMessage, setCurrentMessage] = useState("");
   const [messageList, setMessageList] = useState([]);
+  // const [oldMessage, setOldMessage] = useState(previousMessage)
 //   console.log(messageList, '<== message list');
   const sendMessage = async () => {
     if (currentMessage !== "") {
       const messageData = {
+        UserId: 1,
+        title: "Mojokerto",
         room: room,
         author: username,
         message: currentMessage,
+        text: currentMessage,
         time:
           new Date(Date.now()).getHours() +
           ":" +
@@ -25,10 +29,28 @@ function Forum({ socket, username, room }) {
 
   useEffect(() => {
     socket.on("receive_message", (data) => {
+      console.log(data);
+      console.log(messageList);
       setMessageList((list) => [...list, data]);
     });
   }, [socket]);
 
+  useEffect(() => {
+    // setMessageList(previousMessage.Messages)
+    console.log(previousMessage.Messages);
+
+    let oldMessages = previousMessage.Messages.map(el => {
+      el.room = room
+      el.author = el.User.name
+      el.message = el.text
+      el.time = new Date(el.createdAt).getHours() +
+      ":" +
+      new Date(el.createdAt).getMinutes()
+      return el
+    })
+    console.log(oldMessages);
+    setMessageList(oldMessages);
+  }, [])
   return (
     <div className="forum-window">
       <div className="forum-header">

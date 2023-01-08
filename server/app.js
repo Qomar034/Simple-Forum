@@ -1,35 +1,25 @@
+const socketIoInit = require('./controllers/socketController')
+
+const { Server } = require('socket.io')
 const express = require('express')
 const cors = require('cors')
 const http = require('http')
 
-const client = 3001
-const port = `http://localhost:3000`
+const port = 3001
+const client = `http://localhost:3000`
 const app = express()
+const server = http.createServer(app)
+const routes = require('./routes')
 
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(routes)
 
-const io = new Server(server, {
-    cors: {
-        origin: client,
-        methods: ["GET", "POST", "PUT", "DELETE"],
-    },
+socketIoInit(server)
+server.listen(port, () => {
+    console.log(`Anchoring Server on client ${client}`);
+    console.log(`Analyzing client on ${port}`);
 });
 
-io.on("connection", (socket) => {
-  console.log(`User Connected: ${socket.id}`);
-
-  socket.on("join_room", (data) => {
-    socket.join(data);
-  });
-
-  socket.on("send_message", (data) => {
-    socket.to(data.room).emit("receive_message", data);
-  });
-});
-
-server.listen(client, () => {
-    console.log(`Anchoring Server on Port ${port}`);
-    console.log(`Analyzing Client ${client}`);
-});
+module.exports = server

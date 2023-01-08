@@ -1,8 +1,9 @@
 const router = require('express').Router()
+const Controller = require('../controllers/index')
 
-router.post('/forum/')
+router.post('/forum/', Controller.postTopic)
 
-router.get('/forum/:title')
-router.post('/forum/:title')
+router.get('/forum/:title', Controller.getForum)
+router.post('/forum/:title', Controller.postMessage)
 
 module.exports = router
