@@ -1,5 +1,5 @@
 const { User, Topic, Message } = require('../models')
-
+const { io, connectedSocket } = require('./socketController')
 class Controller {
     static async getForum(req, res, next){
         try {
@@ -27,6 +27,8 @@ class Controller {
 
     static async postMessage(req, res, next){
         try {
+            const { io, connectedSocket, broadcastMessage } = require('./socketController')
+
             let { title } = req.params
 
             // let { id } = req.user.id
@@ -39,6 +41,11 @@ class Controller {
             if (!calledForum) throw ({name: "UnknownForum"})
 
             let newMessage = await Message.create({TopicId: calledForum.id, UserId, text})
+            let sendedMessage = await Message.findOne({where: {id: newMessage.id}, include: [User, Topic]})
+            broadcastMessage(title, sendedMessage)
+            
+            // io.in(title).emit("receive_message", newMessage);
+
             res.status(200).json(newMessage)
         } catch (error) {
             console.log(error);

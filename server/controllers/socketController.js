@@ -1,7 +1,8 @@
 const app = require('../app')
 const { Message, Topic, User } = require('../models')
 let io
-const rooms = []
+
+const connectedSocket = {}
 const socketIoInit = (app) => {
     const { Server } = require('socket.io')
     const client = `http://localhost:3000`
@@ -16,43 +17,44 @@ const socketIoInit = (app) => {
         console.log(`User Connected: ${socket.id}`);
       
         socket.on("join_room", (data) => {
-            
-            let index = rooms.findIndex((el) => el.number == data)
+            if (!connectedSocket[data]) connectedSocket[data] = []
+            // let index = rooms.findIndex((el) => el.number == data)
 
-            if (index == -1 ) {
-                rooms.push({number: data, messages: []})
-                console.log(`User with ID: ${socket.id} CREATED room: ${data}`);
-                socket.join(data);
-            }
-            else {
-                console.log("ini rooms", rooms[index]);
-                console.log(`User with ID: ${socket.id} joined room: ${data}`);
-                socket.to(data).emit("previous_message", rooms[index].messages[0]);
-                socket.join(data);
-            }
+            // if (index == -1 ) {
+            //     rooms.push({number: data, messages: []})
+            //     console.log(`User with ID: ${socket.id} CREATED room: ${data}`);
+            //     socket.join(data);
+            // }
+            // else {
+            //     console.log("ini rooms", rooms[index]);
+            //     console.log(`User with ID: ${socket.id} joined room: ${data}`);
+            //     socket.to(data).emit("previous_message", rooms[index].messages[0]);
+            // }
+            socket.join(data);
+            connectedSocket[data].push(socket)
         }); // => need to send previous data 
       
-        socket.on("send_message", async (data) => {
-            try {
-                console.log(data);
-                let index = rooms.findIndex((el) => el.number == data.room)
-                if (index >= 0) {
-                    rooms[index].messages.push(data)
-                    console.log(rooms[index]);
-                }
-                console.log(data);
-                let { title, UserId, text } = data
-                let calledForum = await Topic.findOne({where: { title }})
-                if (!calledForum) throw ({name: "UnknownForum"})
+        // socket.on("send_message", async (data) => {
+        //     try {
+        //         console.log(data);
+        //         let index = rooms.findIndex((el) => el.number == data.room)
+        //         if (index >= 0) {
+        //             rooms[index].messages.push(data)
+        //             console.log(rooms[index]);
+        //         }
+        //         console.log(data);
+        //         let { title, UserId, text } = data
+        //         let calledForum = await Topic.findOne({where: { title }})
+        //         if (!calledForum) throw ({name: "UnknownForum"})
     
-                await Message.create({TopicId: calledForum.id, UserId, text})
-                //{ room: '123', author: 'marmar', message: 'hahay', time: '10:7' }
-                socket.to(data.room).emit("receive_message", data);
-            } catch (error) {
-                console.log(error);
-            }
+        //         await Message.create({TopicId: calledForum.id, UserId, text})
+        //         //{ room: '123', author: 'marmar', message: 'hahay', time: '10:7' }
+        //         socket.to(data.room).emit("receive_message", data);
+        //     } catch (error) {
+        //         console.log(error);
+        //     }
 
-        });
+        // });
       
         socket.on("disconnect", () => {
           console.log("User Disconnected", socket.id);
@@ -61,6 +63,9 @@ const socketIoInit = (app) => {
     // return io 
 }
 
+const broadcastMessage = (topic, message) => {
+    io.in(topic).emit("receive_message", message);    
+}
 ////////////////////////////////////////////////////
 
 // const io = socketIoInit(app)
@@ -80,7 +85,7 @@ const socketIoInit = (app) => {
 
 
 
-  module.exports = socketIoInit
+  module.exports = {socketIoInit, connectedSocket, io, broadcastMessage}
 
 //   const emitSocket = (socket, event, msg) => {
 //     if (!(socket instanceof Socket)) throw new TypeError("Expected socket instance of Socket, got " + (typeof socket));
