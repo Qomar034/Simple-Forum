@@ -1,4 +1,4 @@
-const socketIoInit = require('./controllers/socketController')
+const {socketIoInit} = require('./controllers/socketController')
 
 const { Server } = require('socket.io')
 const express = require('express')

@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import ScrollToBottom from "react-scroll-to-bottom";
 
@@ -27,11 +28,45 @@ function Forum({ socket, username, room, previousMessage }) {
     }
   };
 
+  const axiosMessage = async () => {
+    if (currentMessage !== "") {
+      const messageData = {
+        UserId: 1,
+        title: "Mojokerto",
+        room: room,
+        author: username,
+        message: currentMessage,
+        text: currentMessage,
+        time:
+          new Date(Date.now()).getHours() +
+          ":" +
+          new Date(Date.now()).getMinutes(),
+      };
+
+    await axios.post("http://localhost:3001/forum/Mojokerto", messageData)
+    // setMessageList((list) => [...list, messageData]);
+    setCurrentMessage("");
+    }
+  }
+
   useEffect(() => {
     socket.on("receive_message", (data) => {
+      // TopicId: calledForum.id, UserId, text
+      const messageData = {
+        UserId: data.UserId,
+        title: "Mojokerto",
+        room: data.Topic.title,
+        author: data.User.name,
+        message: data.text,
+        text: data.text,
+        time:
+          new Date(data.createdAt).getHours() +
+          ":" +
+          new Date(data.createdAt).getMinutes(),
+      };
       console.log(data);
       console.log(messageList);
-      setMessageList((list) => [...list, data]);
+      setMessageList((list) => [...list, messageData]);
     });
   }, [socket]);
 
@@ -87,10 +122,10 @@ function Forum({ socket, username, room, previousMessage }) {
             setCurrentMessage(event.target.value);
           }}
           onKeyPress={(event) => {
-            event.key === "Enter" && sendMessage();
+            event.key === "Enter" && axiosMessage();
           }}
         />
-        <button onClick={sendMessage}>&#9658;</button>
+        <button onClick={axiosMessage}>&#9658;</button>
       </div>
     </div>
   );
